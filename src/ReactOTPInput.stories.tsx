@@ -19,7 +19,6 @@ export default {
 					isPassword={false}
 					value={value}
 					onChange={handleChange}
-					numFields={6}
 				/>
 			)
 		},

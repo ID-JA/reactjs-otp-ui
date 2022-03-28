@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { uuid4 } from './utils/uuid4'
+import './styles/index.css'
 export interface IReactOTPInputProps {
-	numFields: number
+	numFields?: number
 	onChange: (value: string) => void
 	value?: string
 	isPassword: boolean
 }
+
 /**
  * React component for entering and validating PIN code.
  */
