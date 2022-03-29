@@ -15,11 +15,16 @@ export default {
 			}
 
 			return (
-				<ReactOTPInput
-					isPassword={false}
-					value={value}
-					onChange={handleChange}
-				/>
+				<form action=''>
+					<ReactOTPInput
+						isPassword={false}
+						value={value}
+						onChange={handleChange}
+						numFields={6}
+						required
+					/>
+					<button type='submit'>Send</button>
+				</form>
 			)
 		},
 	],

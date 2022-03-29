@@ -29,6 +29,10 @@
 	border-color: rgb(49, 130, 206);
 	box-shadow: rgb(49 130 206) 0px 0px 0px 1px;
 }
+
+.otp-input[aria-invalid='true'] {
+	border-color: rgb(206, 49, 49);
+}
 /* @media (min-width: 768px) {
 	.otp-container {
 		width: 750px;

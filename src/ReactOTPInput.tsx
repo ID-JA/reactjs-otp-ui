@@ -1,27 +1,59 @@
 import React, { useEffect, useState } from 'react'
 import { uuid4 } from './utils/uuid4'
 import './styles/index.css'
+import { ariaAttr } from './utils/dom'
 export interface IReactOTPInputProps {
+	/**
+	 * Number of fields to be displayed.
+	 * @default 5
+	 */
 	numFields?: number
 	onChange: (value: string) => void
+	/**
+	 * Value of the otp input.
+	 */
 	value?: string
+	/**
+	 * if true, the otp input will be a password input.
+	 * @default false
+	 */
 	isPassword: boolean
+	/**
+	 * if true, the otp input will be required.
+	 * @default false
+	 */
+	required?: boolean
+	/**
+	 *
+	 */
+	placeholder?: string
+	type?: 'text' | 'number'
+	isInvalid?: boolean
 }
 
 /**
  * React component for entering and validating PIN code.
  */
 function ReactOTPInput(props: IReactOTPInputProps) {
-	let { numFields = 5, onChange, value, isPassword = false } = props
+	let {
+		numFields = 5,
+		onChange,
+		value,
+		required,
+		isPassword = false,
+		placeholder = '○',
+		type = 'text',
+		isInvalid,
+	} = props
 	const [input, setInput] = useState(new Array(numFields).fill('') as any[])
 	const [activeField, setActiveField] = useState(-1)
 
 	let fields = [] as any[]
 
 	const handleChange = (e: any) => {
-		let value = e.target.value // char
+		let value = e.target.value
 		const target = Number(e.target.dataset.id)
-		let newInput = input // copy
+		let newInput = input // clone
 		newInput[target] = value
 		setInput(newInput)
 		const nextField =
@@ -77,21 +109,16 @@ function ReactOTPInput(props: IReactOTPInputProps) {
 
 	function handlePaste(e: React.ClipboardEvent<HTMLInputElement>) {
 		e.preventDefault()
-		let nextActiveInput = activeField
 		const pastedData = e.clipboardData
 			.getData('text/plain')
-			.slice(0, numFields - activeField) // 1234567
+			.slice(0, numFields - activeField)
 			.split('')
-		console.log(pastedData)
 
 		let newInput = input
-		// activeField = 2 // numFields = 6
+
 		for (let i = activeField; i < numFields; i++) {
 			if (i <= numFields - 1) {
-				// 5
 				const v = pastedData.shift()
-				console.log(v)
-
 				fields[i].value = v
 				newInput[i] = v
 			}
@@ -107,14 +134,20 @@ function ReactOTPInput(props: IReactOTPInputProps) {
 		<div className='otp-container'>
 			{input.map((_, i) => (
 				<input
+					aria-label='Please enter your pin code'
+					inputMode={type === 'number' ? 'numeric' : 'text'}
+					aria-invalid={ariaAttr(isInvalid)}
 					ref={(el) => {
 						fields[i] = el
 					}}
 					className='otp-input'
-					id={`${uuid4()}-${i}`}
+					required={required}
+					id={`input-${numFields}-${i + 1}`}
 					data-id={i}
 					maxLength={1}
+					placeholder={activeField === i ? '' : placeholder}
 					key={i}
+					value={input[i] || ''}
 					onPaste={(e) => handlePaste(e)}
 					onChange={(e) => handleChange(e)}
 					onKeyDown={(e) => handleKeyDown(e)}
@@ -122,7 +155,7 @@ function ReactOTPInput(props: IReactOTPInputProps) {
 						setActiveField(i)
 						e.target.select()
 					}}
-					onBlur={(e) => setActiveField(-1)}
+					onBlur={() => setActiveField(-1)}
 					type={isPassword ? 'password' : 'text'}
 				/>
 			))}
