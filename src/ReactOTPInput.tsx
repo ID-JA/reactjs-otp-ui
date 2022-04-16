@@ -1,34 +1,40 @@
-import React, { useEffect, useState } from 'react'
-import { uuid4 } from './utils/uuid4'
-import './styles/index.css'
-import { ariaAttr } from './utils/dom'
+import React, { useEffect, useState } from 'react';
+import { uuid4 } from './utils/uuid4';
+import './styles/index.css';
+import { ariaAttr } from './utils/dom';
 export interface IReactOTPInputProps {
 	/**
 	 * Number of fields to be displayed.
 	 * @default 5
 	 */
-	numFields?: number
-	onChange: (value: string) => void
+	numFields?: number;
+	onChange: (value: string) => void;
 	/**
 	 * Value of the otp input.
 	 */
-	value?: string
+	value?: string;
 	/**
 	 * if true, the otp input will be a password input.
 	 * @default false
 	 */
-	isPassword: boolean
+	isPassword: boolean;
 	/**
 	 * if true, the otp input will be required.
 	 * @default false
 	 */
-	required?: boolean
+	required?: boolean;
 	/**
 	 *
 	 */
-	placeholder?: string
-	type?: 'text' | 'number'
-	isInvalid?: boolean
+	placeholder?: string;
+
+	type?: 'text' | 'number';
+	/**
+	 * if true, the otp input will be disabled.
+	 * @default false
+	 * @see https://mui.com/material-ui/react-text-field/#main-content
+	 */
+	error?: boolean;
 }
 
 /**
@@ -43,126 +49,127 @@ function ReactOTPInput(props: IReactOTPInputProps) {
 		isPassword = false,
 		placeholder = '○',
 		type = 'text',
-		isInvalid,
-	} = props
-	const [input, setInput] = useState(new Array(numFields).fill('') as any[])
-	const [activeField, setActiveField] = useState(-1)
+		error = false,
+	} = props;
+	const [input, setInput] = useState(new Array(numFields).fill('') as any[]);
+	const [activeField, setActiveField] = useState(-1);
 
-	let fields = [] as any[]
-
+	let fields = [] as any[];
+	// TODO: Handler Chnage
 	const handleChange = (e: any) => {
-		let value = e.target.value
-		const target = Number(e.target.dataset.id)
-		let newInput = input // clone
-		newInput[target] = value
-		setInput(newInput)
+		let value = e.target.value;
+		const target = Number(e.target.dataset.id);
+		let newInput = input;
+		newInput[target] = value;
+		setInput(newInput);
 		const nextField =
 			fields[
 				e.target.dataset.id < numFields
 					? Number(e.target.dataset.id) + 1
 					: e.target.dataset.id
-			]
-		let fullValue = input.join('')
+			];
+		let fullValue = input.join('');
 		if (nextField) {
-			nextField.focus()
-			nextField.select()
+			nextField.focus();
+			nextField.select();
 		}
 
-		onChange(fullValue)
-	}
-
+		onChange(fullValue);
+	};
+	// TODO :  Keys handler
 	function handleKeyDown(e: any) {
 		const target = Number(e.target.dataset.id),
 			nextField = fields[target + 1],
-			prevField = fields[target - 1]
+			prevField = fields[target - 1];
 		switch (e.keyCode) {
 			case 8: // backspace
-				e.preventDefault()
-				fields[target].value = ''
-				input[target] = ''
-				setInput([...input])
+				e.preventDefault();
+				fields[target].value = '';
+				input[target] = '';
+				setInput([...input]);
 				if (target > 0) {
-					prevField.focus()
-					prevField.select()
+					prevField.focus();
+					prevField.select();
 				}
-				onChange(input.join(''))
-				break
+				onChange(input.join(''));
+				break;
 			case 37: // left
-				e.preventDefault()
+				e.preventDefault();
 				if (target > 0) {
-					prevField.focus()
-					prevField.select()
+					prevField.focus();
+					prevField.select();
 				}
 
-				break
+				break;
 			case 39: // right
-				e.preventDefault()
+				e.preventDefault();
 				if (target < numFields - 1) {
-					nextField.focus()
-					nextField.select()
+					nextField.focus();
+					nextField.select();
 				}
-				break
+				break;
 			default:
-				break
+				break;
 		}
 	}
-
+	// TODO : past handler
 	function handlePaste(e: React.ClipboardEvent<HTMLInputElement>) {
-		e.preventDefault()
+		e.preventDefault();
 		const pastedData = e.clipboardData
 			.getData('text/plain')
 			.slice(0, numFields - activeField)
-			.split('')
+			.split('');
 
-		let newInput = input
+		let newInput = input;
 
 		for (let i = activeField; i < numFields; i++) {
 			if (i <= numFields - 1) {
-				const v = pastedData.shift()
-				fields[i].value = v
-				newInput[i] = v
+				const v = pastedData.shift();
+				fields[i].value = v;
+				newInput[i] = v;
 			}
 		}
-		setInput([...newInput])
-		onChange(newInput.join(''))
+		setInput([...newInput]);
+		onChange(newInput.join(''));
 
-		fields[numFields - 1].focus()
-		fields[numFields - 1].select()
+		fields[numFields - 1].focus();
+		fields[numFields - 1].select();
 	}
 
 	return (
 		<div className='otp-container'>
 			{input.map((_, i) => (
 				<input
-					aria-label='Please enter your pin code'
-					inputMode={type === 'number' ? 'numeric' : 'text'}
-					aria-invalid={ariaAttr(isInvalid)}
+					key={i}
 					ref={(el) => {
-						fields[i] = el
+						fields[i] = el;
 					}}
-					className='otp-input'
-					required={required}
+					aria-label='Please enter your pin code'
+					aria-invalid={ariaAttr(error)}
+					className='otp-input error'
+					inputMode={type === 'number' ? 'numeric' : 'text'}
+					required={true}
 					id={`input-${numFields}-${i + 1}`}
 					data-id={i}
 					maxLength={1}
 					placeholder={activeField === i ? '' : placeholder}
-					key={i}
 					value={input[i] || ''}
 					onPaste={(e) => handlePaste(e)}
 					onChange={(e) => handleChange(e)}
 					onKeyDown={(e) => handleKeyDown(e)}
 					onFocus={(e) => {
-						setActiveField(i)
-						e.target.select()
+						setActiveField(i);
+						e.target.select();
 					}}
 					onBlur={() => setActiveField(-1)}
 					type={isPassword ? 'password' : 'text'}
+					autoComplete='off'
 				/>
 			))}
 		</div>
-	)
+	);
 }
 
-ReactOTPInput.displayName = 'ReactOTPInput'
+ReactOTPInput.displayName = 'ReactOTPInput';
 
-export default ReactOTPInput
+export default ReactOTPInput;

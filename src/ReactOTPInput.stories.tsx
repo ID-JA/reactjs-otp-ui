@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
-import { ComponentStory, ComponentMeta } from '@storybook/react'
-import { ReactOTPInput } from './'
+import React, { useState } from 'react';
+import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { ReactOTPInput } from './';
 
 export default {
 	title: 'Example/React OTP Input',
@@ -9,15 +9,20 @@ export default {
 	decorators: [
 		(StoryFn) => {
 			// mock state
-			const [value, setValue] = useState('')
+			const [value, setValue] = useState('');
 			const handleChange = (value: string) => {
-				setValue(value)
-			}
+				setValue(value);
+			};
+			const handleSubmit = (e: React.MouseEvent<HTMLFormElement>) => {
+				e.preventDefault();
+				console.log('submit', value);
+			};
 
 			return (
-				<form action=''>
+				<form
+					onSubmit={(e: React.MouseEvent<HTMLFormElement>) => handleSubmit(e)}>
 					<ReactOTPInput
-						isPassword={false}
+						isPassword={true}
 						value={value}
 						onChange={handleChange}
 						numFields={6}
@@ -25,16 +30,16 @@ export default {
 					/>
 					<button type='submit'>Send</button>
 				</form>
-			)
+			);
 		},
 	],
-} as ComponentMeta<typeof ReactOTPInput>
+} as ComponentMeta<typeof ReactOTPInput>;
 
 const Template: ComponentStory<typeof ReactOTPInput> = (args) => (
 	<ReactOTPInput {...args} />
-)
+);
 
-export const Primary = Template.bind({})
+export const Primary = Template.bind({});
 Primary.args = {
 	numFields: 6,
-}
+};
